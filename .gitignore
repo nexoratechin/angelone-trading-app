@@ -1,0 +1,17 @@
+# --- secrets / local state -------------------------------------------------
+.env
+.venv/
+venv/
+
+# runtime artefacts
+data/
+logs/
+reports/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/

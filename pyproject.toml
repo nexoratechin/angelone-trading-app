@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "banknifty-trading-app"
+version = "0.1.0"
+description = "Event-driven Bank Nifty futures trading app for Angel One SmartAPI with a pluggable, versioned strategy rule engine."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "smartapi-python>=1.5.5",
+    "pyotp>=2.9.0",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-dotenv>=1.0",
+    "PyYAML>=6.0",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "openpyxl>=3.1",
+    "fastapi>=0.111",
+    "uvicorn>=0.30",
+    "websocket-client>=1.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+banknifty = "banknifty_trading_app.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["banknifty_trading_app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["banknifty_trading_app/tests"]

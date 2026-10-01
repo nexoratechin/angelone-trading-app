@@ -1,0 +1,69 @@
+# =============================================================================
+# Strategy Version 2 - EXAMPLE of how little changes to switch/iterate
+# -----------------------------------------------------------------------------
+# Demonstrates: 25 SMA instead of 20, 2% partial instead of 1.7%, 3 lots
+# instead of 2, an added time-window filter, and a distance filter.
+#
+# Activate with:  ACTIVE_STRATEGY=v2_example  in .env
+# =============================================================================
+
+version: v2_example
+description: "Iteration over baseline: 25 SMA, 2.0% partial, 3 lots, entry time window."
+
+instrument:
+  symbol: BANKNIFTY
+  exchange: NFO
+  spot_symbol: "NIFTY BANK"
+  spot_exchange: NSE
+  lots: 3
+  lot_size: 30
+  product_type: NRML
+  contract: near_month
+
+strategy:
+  reference_offset_days: 2
+  one_trade_scope: cycle
+  expiry_squareoff_time: "15:15"
+
+filters:
+  - type: sma
+    period: 25
+    block_when_missing: true
+  - type: time_window
+    start: "09:30"
+    end: "14:45"
+  - type: min_distance
+    points: 5.0
+
+entry:
+  type: reference_cross
+  require_fresh_cross: true
+  gap_open_counts: false
+
+stops:
+  type: daily_close
+  ratchet: true
+  protective_only: true
+
+partial:
+  type: percent_move
+  percent: 2.0
+  lots_to_exit: 2
+  move_stop_to_breakeven: true
+
+trailing:
+  type: percent_move_placeholder
+  percent: 2.0
+  mode: move_stop_to_entry
+
+reversal:
+  enabled: true
+  lots: 3
+  stop_mode: same_rules
+  buffer_points: 10.0
+  cooldown_s: 60.0
+  max_reversals_per_day: 3
+
+expiry:
+  type: always
+  squareoff_time: "15:15"

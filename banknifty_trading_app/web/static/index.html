@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bank Nifty Trading Console</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header>
+  <div class="brand">📈 Bank Nifty Console</div>
+  <nav id="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="trades">Trades</button>
+    <button data-tab="events">Events</button>
+    <button data-tab="strategy">Strategy</button>
+    <button data-tab="backtest">Backtest</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+  <div class="conn"><span id="ws-dot" class="dot"></span><span id="ws-label">connecting…</span></div>
+</header>
+
+<main>
+  <!-- ============================ DASHBOARD ============================ -->
+  <section id="tab-dashboard" class="tab active">
+    <div class="cards">
+      <div class="card"><div class="k">Session</div><div id="s-session" class="v">–</div><div id="s-error" class="err"></div></div>
+      <div class="card"><div class="k">Mode</div><div id="s-mode" class="v">–</div></div>
+      <div class="card"><div class="k">Kill switch</div><div id="s-kill" class="v">–</div></div>
+      <div class="card"><div class="k">Position</div><div id="s-pos" class="v">–</div></div>
+      <div class="card"><div class="k">Avg / Mark</div><div id="s-price" class="v">–</div></div>
+      <div class="card"><div class="k">Stop (spot)</div><div id="s-stop" class="v">–</div></div>
+      <div class="card"><div class="k">Realized</div><div id="s-real" class="v">–</div></div>
+      <div class="card"><div class="k">Unrealized</div><div id="s-unreal" class="v">–</div></div>
+      <div class="card"><div class="k">Trades today</div><div id="s-trades" class="v">–</div></div>
+      <div class="card"><div class="k">Spot LTP</div><div id="s-spot" class="v">–</div></div>
+      <div class="card"><div class="k">Futures LTP</div><div id="s-fut" class="v">–</div></div>
+      <div class="card"><div class="k">Levels (ref/prev/SMA)</div><div id="s-levels" class="v sm">–</div></div>
+    </div>
+
+    <div class="panel-row">
+      <div class="panel">
+        <h3>Start session</h3>
+        <label>Kind
+          <select id="start-kind">
+            <option value="demo">demo (offline, no broker)</option>
+            <option value="paper">paper (needs credentials + SDK)</option>
+            <option value="live">LIVE (real orders)</option>
+          </select>
+        </label>
+        <label>Strategy version <select id="start-strategy"></select></label>
+        <div class="two">
+          <label>Start <input id="start-date" placeholder="YYYY-MM-DD" /></label>
+          <label>End <input id="end-date" placeholder="YYYY-MM-DD" /></label>
+        </div>
+        <label>Pace (sec / trading day, demo only) <input id="start-pace" type="number" step="0.05" value="0.1" /></label>
+        <label class="chk"><input type="checkbox" id="confirm-live" /> I understand LIVE places real orders</label>
+        <div class="btns">
+          <button class="primary" onclick="startSession()">Start</button>
+          <button class="danger" onclick="stopSession()">Stop</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Emergency</h3>
+        <p class="muted">The kill switch blocks all new entries (exits are still allowed).</p>
+        <div class="btns">
+          <button class="danger" onclick="killSwitch()">TRIP kill switch</button>
+          <button onclick="resetKill()">Reset</button>
+        </div>
+        <hr />
+        <h3>Quick demo</h3>
+        <p class="muted">Runs the live pipeline offline with synthetic data.</p>
+        <button onclick="quickDemo()">Run 120-day demo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ TRADES ============================ -->
+  <section id="tab-trades" class="tab">
+    <div class="toolbar"><button onclick="loadTrades()">↻ Refresh</button><span id="trades-count" class="muted"></span></div>
+    <div class="tablewrap"><table id="trades-table"></table></div>
+  </section>
+
+  <!-- ============================ EVENTS ============================ -->
+  <section id="tab-events" class="tab">
+    <div class="toolbar"><button onclick="loadEvents()">↻ Refresh</button></div>
+    <div class="tablewrap"><table id="events-table"></table></div>
+  </section>
+
+  <!-- ============================ STRATEGY ============================ -->
+  <section id="tab-strategy" class="tab">
+    <div class="panel-row">
+      <div class="panel narrow">
+        <h3>Versions</h3>
+        <ul id="strategy-list" class="list"></ul>
+        <button onclick="newStrategy()">+ New version</button>
+      </div>
+      <div class="panel grow">
+        <h3>Editor <span id="strategy-name" class="muted"></span></h3>
+        <textarea id="strategy-yaml" spellcheck="false"></textarea>
+        <div class="btns">
+          <button class="primary" onclick="saveStrategy()">Save</button>
+          <button onclick="activateStrategy()">Set active</button>
+          <span id="strategy-msg" class="msg"></span>
+        </div>
+        <p class="muted">Saving validates the YAML against the rule registry before writing. Rules are data - no code changes needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ BACKTEST ============================ -->
+  <section id="tab-backtest" class="tab">
+    <div class="panel-row">
+      <div class="panel">
+        <h3>Run backtest</h3>
+        <label>Strategy <select id="bt-strategy"></select></label>
+        <div class="two">
+          <label>Start <input id="bt-start" placeholder="YYYY-MM-DD" /></label>
+          <label>End <input id="bt-end" placeholder="YYYY-MM-DD" /></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="bt-synthetic" checked /> synthetic data (no broker)</label>
+        <button class="primary" onclick="runBacktest()">Run</button>
+        <pre id="bt-result" class="result"></pre>
+      </div>
+      <div class="panel grow">
+        <h3>Reports</h3>
+        <ul id="reports-list" class="list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ SETTINGS ============================ -->
+  <section id="tab-settings" class="tab">
+    <div class="panel-row">
+      <div class="panel">
+        <h3>Settings</h3>
+        <div id="config-form" class="form"></div>
+        <div class="btns"><button class="primary" onclick="saveConfig()">Save settings</button><span id="config-msg" class="msg"></span></div>
+      </div>
+      <div class="panel">
+        <h3>Angel One credentials</h3>
+        <p class="muted">Stored in <code>.env</code> (git-ignored). Leave a field blank to keep the current value.</p>
+        <div class="form">
+          <label>API key <input id="cr-key" type="password" placeholder="••••••" /></label>
+          <label>Client code <input id="cr-code" placeholder="A12345" /></label>
+          <label>PIN <input id="cr-pin" type="password" /></label>
+          <label>TOTP secret <input id="cr-totp" type="password" /></label>
+          <label>Web token (optional) <input id="cr-webtoken" placeholder="blank = no auth on localhost" /></label>
+        </div>
+        <div class="btns"><button class="primary" onclick="saveCredentials()">Save credentials</button><span id="cr-msg" class="msg"></span></div>
+        <hr />
+        <h3>Auth token (this browser)</h3>
+        <input id="api-token" placeholder="only if WEB_TOKEN is set" />
+        <button onclick="saveToken()">Use token</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

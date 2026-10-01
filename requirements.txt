@@ -1,0 +1,34 @@
+# Bank Nifty automated trading app - runtime dependencies
+#
+# NOTE ON ANGEL ONE API:
+#   The official Python SDK is `smartapi-python` from Angel One.
+#   `pyotp` is used only to generate the TOTP from your TOTP secret.
+#   All REST/WebSocket calls go through the SDK - we never invent endpoints.
+smartapi-python>=1.5.5
+pyotp>=2.9.0
+
+# config
+pydantic>=2.7
+pydantic-settings>=2.3
+python-dotenv>=1.0
+PyYAML>=6.0
+
+# data / numerics
+pandas>=2.2
+numpy>=1.26
+
+# persistence (standard-library sqlite3 is used directly; no ORM needed)
+
+# reporting
+openpyxl>=3.1
+
+# dashboard
+fastapi>=0.111
+uvicorn>=0.30
+
+# websocket transport (transitive dep of smartapi-python, pinned for clarity)
+websocket-client>=1.7
+
+# dev / tests
+pytest>=8.2
+pytest-asyncio>=0.23

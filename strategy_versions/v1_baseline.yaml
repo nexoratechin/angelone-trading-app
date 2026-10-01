@@ -1,0 +1,69 @@
+# =============================================================================
+# Strategy Version 1 - baseline (the original strategy)
+# -----------------------------------------------------------------------------
+# Edit this file to change strategy behaviour. No Python changes required for
+# the common cases (SMA period, percentages, lot counts, filters, stops...).
+# =============================================================================
+
+version: v1_baseline
+description: >
+  Original Bank Nifty strategy: 20 SMA filter on daily Spot closes; entry on a
+  fresh cross of the day-before-yesterday Spot close; 2 lots; yesterday's Spot
+  close as the ratcheting stop; 1.7% partial on one lot; 2-lot reversal on a
+  stop; always square off on the last trading day of the contract.
+
+instrument:
+  symbol: BANKNIFTY
+  exchange: NFO
+  spot_symbol: "NIFTY BANK"
+  spot_exchange: NSE
+  lots: 2
+  lot_size: 30
+  product_type: NRML
+  contract: near_month          # near_month | next_month
+
+strategy:
+  reference_offset_days: 2      # 2 = day-before-yesterday close is the trigger
+  one_trade_scope: cycle        # cycle | day
+  expiry_squareoff_time: "15:15"
+
+filters:
+  - type: sma
+    period: 20
+    block_when_missing: true
+
+entry:
+  type: reference_cross
+  require_fresh_cross: true     # must cross through the level during the session
+  gap_open_counts: false        # a gap beyond the level does NOT auto-enter
+
+stops:
+  type: daily_close
+  ratchet: true                 # previous-day close, only ever tightens
+  protective_only: true         # if yesterday's close is on the wrong side of the
+                                # entry, use the entry price instead (avoids an
+                                # instant stop). Set false for the literal reading.
+
+partial:
+  type: percent_move
+  percent: 1.7                  # measured on Spot from entry Spot
+  lots_to_exit: 1
+  move_stop_to_breakeven: true
+
+trailing:
+  type: percent_move_placeholder
+  percent: 2.0
+  mode: disabled                # <-- DEFINE THE 2% RULE HERE LATER
+                                # disabled | move_stop_to_entry | trail_percent | exit_remaining | custom
+
+reversal:
+  enabled: true
+  lots: 2
+  stop_mode: same_rules         # same_rules | next_day
+  buffer_points: 0.0            # widen the reversal stop if you see re-trigger churn
+  cooldown_s: 60.0              # ignore stop checks for this long after a reversal entry
+  max_reversals_per_day: 3      # cap churn; set null for unlimited
+
+expiry:
+  type: always                  # always | never
+  squareoff_time: "15:15"
