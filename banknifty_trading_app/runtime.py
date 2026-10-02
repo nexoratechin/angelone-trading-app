@@ -100,7 +100,13 @@ class TradingRuntime:
         log.info("Credentials: %s", self.settings.redacted_credentials())
 
         if not self.settings.is_live:
-            log.warning("PAPER mode: orders are simulated. Set MODE=live and LIVE_TRADING=true to trade live.")
+            if self.settings.live_requested:
+                log.error("Live was requested but the interlock is not armed: %s",
+                          self.settings.live_block_reason())
+            log.warning(
+                "PAPER mode: real broker prices, SIMULATED fills. Live needs "
+                "MODE=live + LIVE_TRADING=true + LIVE_ARMED=true (see: main arm-live)."
+            )
 
         self.master = InstrumentMaster(self.settings.instrument_cache_path, self.settings.angel_instrument_master_url)
         self.rest = AngelREST(self.settings, self.auth)

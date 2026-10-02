@@ -1,6 +1,8 @@
 """Live executor: places real orders via SmartAPI and confirms the fill.
 
 Safety properties:
+  * master arm switch: refuses to construct or run unless MODE=live,
+    LIVE_TRADING=true and LIVE_ARMED=true (re-checked before every order),
   * broker-side duplicate check: if an open order with the same tag already
     exists, we do not place another,
   * order-status confirmation with a timeout, so we never assume a fill,
@@ -29,17 +31,38 @@ tradelog = get_trade_logger()
 
 
 class LiveExecutor:
+    """Places real orders. Refuses to run unless every live flag is set.
+
+    The arm switch is re-checked twice: once at construction and again
+    immediately before each broker call. This is deliberate defence in depth -
+    ``build_executor`` already enforces it, but if anything ever mutates
+    ``settings`` mid-session the order still cannot escape.
+    """
+
     def __init__(
         self,
         settings: Settings,
         rest: AngelREST,
         instrument: Instrument,
     ) -> None:
+        settings.assert_live_allowed()
         self.settings = settings
         self.rest = rest
         self.instrument = instrument
 
+    def _arm_ok(self) -> bool:
+        """Return True only if live trading is still fully armed right now."""
+        try:
+            self.settings.assert_live_allowed()
+            return True
+        except Exception as exc:
+            log.error("LIVE BLOCKED before order: %s", exc)
+            return False
+
     async def execute(self, req: OrderRequest, intent: TradeIntent) -> Fill | None:
+        if not self._arm_ok():
+            return None
+
         tag = f"{intent.intent_id[:18]}"
 
         if await self._duplicate_open_order(tag):

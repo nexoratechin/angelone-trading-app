@@ -113,14 +113,16 @@ def setup_env_interactive(env_path: str | Path = ".env", example_path: str | Pat
         if value:
             updates[key] = value
 
-    # safe defaults
+    # safe defaults - paper only, live disarmed
     updates.setdefault("MODE", "paper")
     updates.setdefault("LIVE_TRADING", "false")
+    updates.setdefault("LIVE_ARMED", "false")
 
     _write_env(env_path, existing, updates)
     print("\nSaved credentials to .env")
     for key in CREDENTIAL_KEYS:
         print(f"  {key}: {mask(_read_env(env_path).get(key, ''))}")
-    print("\nMode: paper (live requires MODE=live and LIVE_TRADING=true)")
+    print("\nMode: paper. Live trading is LOCKED (LIVE_ARMED=false).")
     print("Next: run   python -m banknifty_trading_app.main check")
+    print("      then   python -m banknifty_trading_app.main run     (paper, real prices)")
     return env_path

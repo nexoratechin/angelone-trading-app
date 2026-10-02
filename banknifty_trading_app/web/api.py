@@ -333,6 +333,7 @@ def create_app(settings: Settings | None = None) -> "FastAPI":
     @app.websocket("/ws")
     async def ws(sock: WebSocket):
         await sock.accept()
+        login_on = _login_required()
         token = sock.query_params.get("token") or sock.headers.get("x-auth-token")
         token_ok = bool(web_token and token == web_token)
         cookie_ok = bool(

@@ -47,10 +47,12 @@
         <label>Kind
           <select id="start-kind">
             <option value="demo">demo (offline, no broker)</option>
-            <option value="paper">paper (needs credentials + SDK)</option>
-            <option value="live">LIVE (real orders)</option>
+            <option value="paper">paper (real prices, simulated fills)</option>
+            <option value="live" id="start-kind-live" disabled>LIVE (real orders) – LOCKED</option>
           </select>
         </label>
+        <p class="muted" id="arm-note">Live trading is locked by the master arm switch (LIVE_ARMED=false).
+          Paper trading uses real broker prices with simulated fills – no orders are ever sent.</p>
         <label>Strategy version <select id="start-strategy"></select></label>
         <div class="two">
           <label>Start <input id="start-date" placeholder="YYYY-MM-DD" /></label>

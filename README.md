@@ -11,6 +11,11 @@ two cannot drift apart.
 > **no guarantee of millisecond execution** - broker, network and exchange
 > latency dominate. Use at your own risk.
 
+> 🔒 **Live trading is locked by default.** Real orders require *three*
+> independent flags (`MODE=live`, `LIVE_TRADING=true`, `LIVE_ARMED=true`) and
+> the arm switch is only settable from the CLI - never from the web console.
+> See **[LIVE_TRADING.md](LIVE_TRADING.md)** for the full paper → live path.
+
 ---
 
 ## Pipeline
@@ -43,11 +48,16 @@ copy .env.example .env      # then fill in your Angel One credentials
 ```
 MODE=paper
 LIVE_TRADING=false
+LIVE_ARMED=false        # master interlock - leave false until you go live
 ANGEL_API_KEY=...
 ANGEL_CLIENT_CODE=...
 ANGEL_PIN=...
 ANGEL_TOTP_SECRET=...
 ```
+
+`MODE=paper` is what you want day-to-day: **real Angel One prices, simulated
+fills, zero real orders.** Only the final broker call is swapped out, so the
+strategy, risk gates, position book and P&L you watch are the real ones.
 
 Angel One prerequisites: an app registered on the SmartAPI portal (API key), the
 account PIN, and a TOTP secret. You may need to whitelist your static IP.
@@ -66,6 +76,13 @@ python -m banknifty_trading_app.main backtest --start 2025-09-01 --end 2026-09-0
 python -m banknifty_trading_app.main report            # Excel from the live database
 python -m banknifty_trading_app.main kill "reason"     # trip the kill switch
 python -m banknifty_trading_app.main unkill
+
+# --- go-live controls (see LIVE_TRADING.md) ---------------------------------
+python -m banknifty_trading_app.main preflight         # go-live checklist (offline)
+python -m banknifty_trading_app.main preflight --online  # + broker login, lot size, funds
+python -m banknifty_trading_app.main live-status       # show the interlock state
+python -m banknifty_trading_app.main arm-live          # arm real trading (asks for confirmation)
+python -m banknifty_trading_app.main disarm-live       # lock it again + force MODE=paper
 ```
 
 `backtest --synthetic` needs **no broker credentials** and produces a full
@@ -91,8 +108,10 @@ A full control panel, not a read-only view:
 
 * **Dashboard** - live state over WebSocket (position, P&L, stop, levels,
   Spot/Futures LTP, trades today).
-* **Start / stop sessions** - `demo` (offline), `paper`, or `live`. Live
-  requires the confirmation checkbox *and* `confirm_live=true` on the API.
+* **Start / stop sessions** - `demo` (offline), `paper`, or `live`. Live is a
+  greyed-out option until the CLI arm switch is on, and still requires the
+  confirmation checkbox *and* `confirm_live=true` on the API. The console
+  **cannot** arm live trading.
 * **Strategy** - list, create, edit and validate YAML versions in the browser,
   and set the active version (validated against the rule registry before save).
 * **Settings** - edit non-secret settings; **credentials** form writes
@@ -185,13 +204,17 @@ the fill mechanism differ. `tests/test_backtest.py` asserts determinism.
 
 ## Reliability & safety features
 
-Paper by default · explicit live opt-in · duplicate-order protection (intent ids
-**and** broker-side order tags) · order-status confirmation with timeout ·
-WebSocket auto-reconnect with exponential backoff · API error handling ·
-crash recovery + position reconciliation against the broker at start-up · stale
-market-data detection · emergency kill switch (file or `kill` command) ·
-maximum-lot protection · optional daily-loss and max-trades limits · full logging
-(app + dedicated trade log) · batched SQLite persistence.
+Paper by default · **three-flag live interlock** (`MODE` + `LIVE_TRADING` +
+`LIVE_ARMED`, enforced in config, the executor router *and* before every broker
+call) · a live request that is not armed raises instead of silently filling as
+paper · the web console cannot arm live · `preflight` go-live checklist · explicit
+live opt-in · duplicate-order protection (intent ids **and** broker-side order
+tags) · order-status confirmation with timeout · WebSocket auto-reconnect with
+exponential backoff · API error handling · crash recovery + position
+reconciliation against the broker at start-up · stale market-data detection ·
+emergency kill switch (file or `kill` command) · maximum-lot protection ·
+optional daily-loss and max-trades limits · full logging (app + dedicated trade
+log) · batched SQLite persistence.
 
 ---
 
@@ -199,7 +222,7 @@ maximum-lot protection · optional daily-loss and max-trades limits · full logg
 
 ```
 banknifty_trading_app/
-  main.py          runtime.py        config.py
+  main.py          runtime.py        config.py        preflight.py
   core/            events, bus, models, state
   angelone/        auth, rest, websocket, instruments, constants
   market_data/     feed, store, daily_closes, staleness
@@ -246,4 +269,4 @@ python -m pytest -q banknifty_trading_app/tests
 
 Covers rules, engine scenarios (entry, partial, reversal, expiry, one-trade,
 protective stop, reversal cap), level computation, backtest determinism,
-report generation and persistence round-trip.
+report generation, persistence round-trip, and the live-trading interlock.

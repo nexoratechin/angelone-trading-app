@@ -40,6 +40,10 @@ CRED_KEYS = {
     "ANGEL_PIN": "angel_pin",
     "ANGEL_TOTP_SECRET": "angel_totp_secret",
 }
+# Shown on the settings page but deliberately NOT editable through the generic
+# settings form. Arming live trading is a deliberate CLI action, not a stray
+# click on a settings page.
+READONLY_KEYS = {"LIVE_ARMED"}
 
 
 def _load_settings() -> Settings:
@@ -82,8 +86,16 @@ class Controller:
             coro = runner.run(date_start, date_end, pace_s=max(0.0, pace_s))
             self.session = runner
         elif kind in ("paper", "live"):
-            if kind == "live" and not confirm_live:
-                raise ValueError("Live trading requires confirm_live=true")
+            if kind == "live":
+                # Two independent gates: the UI confirmation, and the code-level
+                # arm switch. The arm switch cannot be bypassed from the console.
+                if not confirm_live:
+                    raise ValueError("Live trading requires confirm_live=true")
+                if not self.settings.live_armed:
+                    raise ValueError(
+                        self.settings.live_block_reason()
+                        or "live trading is locked"
+                    )
             from ..runtime import TradingRuntime
 
             self.settings.mode = kind
@@ -158,6 +170,8 @@ class Controller:
             out.update({
                 "mode": getattr(s.settings, "mode", None),
                 "live": getattr(s.settings, "is_live", False),
+                "live_armed": getattr(s.settings, "live_armed", False),
+                "live_block_reason": getattr(s.settings, "live_block_reason", lambda: None)(),
                 "kill_switch": s.kill_switch.is_active(),
                 "kill_reason": s.kill_switch.reason,
                 "side": snap.side.value if snap.side else None,
@@ -230,7 +244,8 @@ class Controller:
     # ================================================================== config
     def read_config(self) -> dict:
         env = read_env()
-        cfg = {k: env.get(k, "") for k in sorted(SETTING_KEYS)}
+        cfg = {k: env.get(k, "") for k in sorted(SETTING_KEYS | READONLY_KEYS)}
+        cfg["live_armed"] = self.settings.live_armed
         cfg["credentials"] = {
             "angel_api_key": "set" if env.get("ANGEL_API_KEY") else "missing",
             "angel_client_code": "set" if env.get("ANGEL_CLIENT_CODE") else "missing",

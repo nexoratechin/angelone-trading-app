@@ -11,6 +11,10 @@
     python -m banknifty_trading_app.main validate
     python -m banknifty_trading_app.main kill "manual stop"
     python -m banknifty_trading_app.main unkill
+    python -m banknifty_trading_app.main preflight --online   # go-live checklist
+    python -m banknifty_trading_app.main arm-live              # arm the interlock
+    python -m banknifty_trading_app.main disarm-live
+    python -m banknifty_trading_app.main live-status
 """
 
 from __future__ import annotations
@@ -43,6 +47,12 @@ def cmd_run(args: argparse.Namespace) -> int:
     if args.live:
         settings.mode = "live"
         settings.live_trading = True
+        # --live is a *request*; the arm switch still decides.
+        if not settings.live_armed:
+            print(f"error: {settings.live_block_reason()}", file=sys.stderr)
+            print("Arm it explicitly with:", file=sys.stderr)
+            print("  python -m banknifty_trading_app.main arm-live", file=sys.stderr)
+            return 2
     runtime = TradingRuntime(settings, spec)
     try:
         asyncio.run(runtime.start())
@@ -198,6 +208,89 @@ def cmd_unkill(args: argparse.Namespace) -> int:
     return 0
 
 
+# ================================================================ arm switch
+def cmd_arm_live(args: argparse.Namespace) -> int:
+    """Arm the master live-trading interlock (does NOT start trading)."""
+    from .credentials import update_env
+
+    settings, spec = _bootstrap(args.strategy)
+    if settings.is_live:
+        print("Live trading is already fully armed (MODE=live, LIVE_TRADING=true).")
+        return 0
+    if not args.yes:
+        print("Arming live trading permits this app to place REAL orders with REAL money.")
+        print("Only do this after:  python -m banknifty_trading_app.main preflight --online")
+        print("Use --cancel for a non-interactive abort.\n")
+        if not args.confirm:
+            print("Cancelled - LIVE_ARMED is unchanged.")
+            return 1
+        try:
+            answer = input("Type ARM to proceed: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nCancelled - LIVE_ARMED is unchanged.")
+            return 1
+        if answer != "ARM":
+            print("Cancelled - LIVE_ARMED is unchanged.")
+            return 1
+
+    update_env({"LIVE_ARMED": "true"})
+    print("\nLIVE_ARMED=true written to .env")
+    if settings.mode != "live" or not settings.live_trading:
+        print(f"Note: MODE={settings.mode}, LIVE_TRADING={settings.live_trading} - still PAPER.")
+        print("To actually trade live you must ALSO set in .env:")
+        print("  MODE=live")
+        print("  LIVE_TRADING=true")
+        print("Then: python -m banknifty_trading_app.main run --live")
+    else:
+        print("MODE=live and LIVE_TRADING=true are already set.")
+        print("Next: python -m banknifty_trading_app.main preflight --online")
+        print("Then: python -m banknifty_trading_app.main run --live")
+    return 0
+
+
+def cmd_disarm_live(args: argparse.Namespace) -> int:
+    """Disarm live trading and force the app back to a safe paper state."""
+    from .credentials import update_env
+
+    settings, _ = _bootstrap(args.strategy)
+    update_env({"LIVE_ARMED": "false", "LIVE_TRADING": "false", "MODE": "paper"})
+    print("Disarmed. .env now has:")
+    print("  LIVE_ARMED=false")
+    print("  LIVE_TRADING=false")
+    print("  MODE=paper")
+    return 0
+
+
+def cmd_live_status(args: argparse.Namespace) -> int:
+    """Print the live-trading interlock state and what is still required."""
+    settings, _ = _bootstrap(args.strategy)
+    print("Live-trading interlock")
+    print("======================")
+    rows = [
+        ("MODE", settings.mode, settings.mode == "live"),
+        ("LIVE_TRADING", str(settings.live_trading).lower(), settings.live_trading),
+        ("LIVE_ARMED", str(settings.live_armed).lower(), settings.live_armed),
+    ]
+    for name, value, ok in rows:
+        print(f"  [{'OK ' if ok else '-- '}] {name:<14} {value}")
+    print()
+    reason = settings.live_block_reason()
+    if reason:
+        print(f"State: PAPER (safe)\n  {reason}")
+    else:
+        print("State: LIVE ARMED - this app WILL place real orders.")
+        print("Disarm now with: python -m banknifty_trading_app.main disarm-live")
+    return 0
+
+
+def cmd_preflight(args: argparse.Namespace) -> int:
+    """Everything you must have in place before trading live. Places no orders."""
+    from .preflight import run_preflight
+
+    settings, spec = _bootstrap(args.strategy)
+    return run_preflight(settings, spec, online=args.online)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="banknifty", description="Bank Nifty futures trading app")
     parser.add_argument("--strategy", help="strategy version name or YAML path override")
@@ -252,6 +345,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_unkill = sub.add_parser("unkill", help="reset the kill switch")
     p_unkill.set_defaults(func=cmd_unkill)
+
+    p_arm = sub.add_parser("arm-live", help="arm the live-trading interlock (does not start trading)")
+    p_arm.add_argument("--yes", action="store_true", help="skip the interactive ARM confirmation")
+    p_arm.add_argument("--cancel", dest="confirm", action="store_false", help="never prompt, just cancel")
+    p_arm.set_defaults(func=cmd_arm_live)
+
+    p_disarm = sub.add_parser("disarm-live", help="disarm live trading and force MODE=paper")
+    p_disarm.set_defaults(func=cmd_disarm_live)
+
+    p_ls = sub.add_parser("live-status", help="show the live-trading interlock state")
+    p_ls.set_defaults(func=cmd_live_status)
+
+    p_pre = sub.add_parser(
+        "preflight",
+        help="check everything required before going live (read-only, places no orders)",
+    )
+    p_pre.add_argument(
+        "--online", action="store_true", help="also log in to Angel One and verify the session"
+    )
+    p_pre.set_defaults(func=cmd_preflight)
     return parser
 
 

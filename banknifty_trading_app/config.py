@@ -17,6 +17,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 Mode = Literal["paper", "live"]
 
 
+class LiveTradingLocked(RuntimeError):
+    """Raised whenever anything tries to trade real money without the arm switch.
+
+    This is the single exception the safety interlock raises. It is checked at
+    three independent layers (config, executor router, and immediately before
+    every broker call) so a single missed check cannot place a live order.
+    """
+
+
 class Settings(BaseSettings):
     """All runtime configuration in one place."""
 
@@ -31,6 +40,11 @@ class Settings(BaseSettings):
     # --- runtime -----------------------------------------------------------
     mode: Mode = "paper"
     live_trading: bool = False
+    # Master arm switch for real-money trading. Live is impossible unless this
+    # is true, *even if* MODE=live and LIVE_TRADING=true. Toggle it with
+    #   python -m banknifty_trading_app.main arm-live   /  disarm-live
+    # Default stays false so a stray env var can never arm live trading.
+    live_armed: bool = False
     active_strategy: str = "v1_baseline"
 
     # --- paths -------------------------------------------------------------
@@ -123,8 +137,40 @@ class Settings(BaseSettings):
     # --- helpers -----------------------------------------------------------
     @property
     def is_live(self) -> bool:
-        """True only when the operator explicitly opts into live trading."""
-        return self.mode == "live" and self.live_trading
+        """True only when the operator explicitly opts into live trading.
+
+        Requires *all three* flags: ``MODE=live``, ``LIVE_TRADING=true`` and the
+        master arm ``LIVE_ARMED=true``. Anything missing fails closed to paper -
+        the app never "half goes live".
+        """
+        return self.mode == "live" and self.live_trading and self.live_armed
+
+    @property
+    def live_requested(self) -> bool:
+        """True when the operator asked for live mode, armed or not.
+
+        Used to fail loudly instead of silently downgrading to paper.
+        """
+        return self.mode == "live" or self.live_trading
+
+    def live_block_reason(self) -> str | None:
+        """Why live trading is unavailable, or ``None`` when it is armed."""
+        if self.is_live:
+            return None
+        missing: list[str] = []
+        if not self.live_armed:
+            missing.append("LIVE_ARMED=false (master arm switch)")
+        if self.mode != "live":
+            missing.append(f"MODE={self.mode!r} (need MODE=live)")
+        if not self.live_trading:
+            missing.append("LIVE_TRADING=false (need LIVE_TRADING=true)")
+        return "live trading is LOCKED: " + ", ".join(missing)
+
+    def assert_live_allowed(self) -> None:
+        """Raise :class:`LiveTradingLocked` unless every live flag is set."""
+        reason = self.live_block_reason()
+        if reason:
+            raise LiveTradingLocked(reason)
 
     @property
     def login_enabled(self) -> bool:

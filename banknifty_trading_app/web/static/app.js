@@ -240,11 +240,27 @@ async function downloadReport(name) {
 }
 
 // ------------------------------------------------------------------ settings
+function applyArmState(armed) {
+  const opt = $("start-kind-live");
+  const note = $("arm-note");
+  if (opt) {
+    opt.disabled = !armed;
+    opt.textContent = armed ? "LIVE (real orders)" : "LIVE (real orders) – LOCKED";
+  }
+  if (note) {
+    note.textContent = armed
+      ? "Live trading is ARMED. Starting a LIVE session places real orders with real money."
+      : "Live trading is locked by the master arm switch (LIVE_ARMED=false). Paper trading uses real broker prices with simulated fills – no orders are ever sent.";
+  }
+}
+
 async function loadConfig() {
   const cfg = await GET("/api/config");
+  applyArmState(!!cfg.live_armed);
   const box = $("config-form");
   box.innerHTML = Object.keys(cfg).filter((k) => k !== "credentials").map((k) => {
     const v = cfg[k] ?? "";
+    if (k === "LIVE_ARMED") return `<label>LIVE_ARMED<input value="${v ? "true (armed)" : "false (locked)"}" disabled /></label><p class="muted">Master arm switch. Edit with the CLI: <code>main arm-live</code> / <code>main disarm-live</code>.</p>`;
     if (k === "MODE") return `<label>MODE<select data-k="${k}"><option ${v === "paper" ? "selected" : ""}>paper</option><option ${v === "live" ? "selected" : ""}>live</option></select></label>`;
     if (k === "LIVE_TRADING") return `<label>LIVE_TRADING<select data-k="${k}"><option ${v === "false" || v === "" ? "selected" : ""}>false</option><option ${v === "true" ? "selected" : ""}>true</option></select></label>`;
     return `<label>${k}<input data-k="${k}" value="${String(v).replace(/"/g, "&quot;")}" /></label>`;
