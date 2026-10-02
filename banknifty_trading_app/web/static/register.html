@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Create account · Bank Nifty Console</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="login-body">
+  <main class="login-wrap">
+    <form class="login-card" id="register-form" autocomplete="on">
+      <div class="login-brand">📈 Bank Nifty Console</div>
+      <p class="muted login-sub">Create an account to access the trading control panel.</p>
+
+      <p id="register-notice" class="notice"></p>
+
+      <label for="username">Username
+        <input id="username" name="username" autocomplete="username" required autofocus />
+        <span class="hint">3–32 characters: letters, digits, “.”, “_” or “-”.</span>
+      </label>
+
+      <label for="password">Password
+        <span class="pw">
+          <input id="password" name="password" type="password" autocomplete="new-password" required />
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password">👁</button>
+        </span>
+        <span class="hint">At least 8 characters.</span>
+      </label>
+
+      <label for="confirm">Confirm password
+        <input id="confirm" name="confirm" type="password" autocomplete="new-password" required />
+      </label>
+
+      <label for="code" id="code-label" style="display:none">Invite code
+        <input id="code" name="code" autocomplete="off" />
+      </label>
+
+      <button class="primary login-btn" type="submit" id="register-btn">Create account</button>
+      <div id="register-msg" class="login-msg" role="alert"></div>
+
+      <p class="login-alt">Already have an account? <a href="/login">Sign in</a></p>
+    </form>
+  </main>
+  <script src="/static/register.js"></script>
+</body>
+</html>

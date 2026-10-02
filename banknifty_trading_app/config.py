@@ -95,6 +95,16 @@ class Settings(BaseSettings):
     web_port: int = 8080
     web_token: SecretStr = SecretStr("")
 
+    # --- web console login -------------------------------------------------
+    # Leave APP_PASSWORD blank to run without a login page (e.g. trusted
+    # localhost). Set it to require a signed-in session for the whole console.
+    app_username: str = "admin"
+    app_password: SecretStr = SecretStr("")
+    # Accounts created via the register page live here (password hashes only).
+    auth_db_path: Path = Path("data/users.sqlite3")
+    # Required for sign-ups once the first account exists. Blank = closed.
+    register_code: SecretStr = SecretStr("")
+
     # --- validation --------------------------------------------------------
     @field_validator("mode")
     @classmethod
@@ -116,6 +126,11 @@ class Settings(BaseSettings):
         """True only when the operator explicitly opts into live trading."""
         return self.mode == "live" and self.live_trading
 
+    @property
+    def login_enabled(self) -> bool:
+        """True when a console password is configured (login page active)."""
+        return bool(self.app_password.get_secret_value())
+
     def ensure_dirs(self) -> None:
         for path in (
             self.data_dir,
@@ -125,6 +140,7 @@ class Settings(BaseSettings):
         ):
             Path(path).mkdir(parents=True, exist_ok=True)
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(self.auth_db_path).parent.mkdir(parents=True, exist_ok=True)
         Path(self.kill_switch_file).parent.mkdir(parents=True, exist_ok=True)
 
     def strategy_path(self, version: str | None = None) -> Path:

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign in · Bank Nifty Console</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="login-body">
+  <main class="login-wrap">
+    <form class="login-card" id="login-form" autocomplete="on">
+      <div class="login-brand">📈 Bank Nifty Console</div>
+      <p class="muted login-sub">Sign in to access the trading control panel.</p>
+
+      <label for="username">Username
+        <input id="username" name="username" autocomplete="username" required autofocus />
+      </label>
+
+      <label for="password">Password
+        <span class="pw">
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password">👁</button>
+        </span>
+      </label>
+
+      <button class="primary login-btn" type="submit" id="login-btn">Sign in</button>
+      <div id="login-msg" class="login-msg" role="alert"></div>
+      <p class="login-alt" id="register-alt" style="display:none">New here? <a href="/register">Create an account</a></p>
+    </form>
+  </main>
+  <script src="/static/login.js"></script>
+</body>
+</html>

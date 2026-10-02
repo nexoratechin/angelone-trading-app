@@ -16,9 +16,29 @@ function saveToken() {
   connectWS();
   refreshAll();
 }
+function logout() {
+  fetch("/api/logout", { method: "POST", headers: authHeaders() })
+    .catch(() => {})
+    .finally(() => { localStorage.removeItem("bn_token"); location.href = "/login"; });
+}
+async function initAuth() {
+  try {
+    const me = await GET("/api/me");
+    const b = $("logout-btn");
+    if (me && me.login_enabled) {
+      b.style.display = "";
+      b.textContent = me.username ? "Sign out (" + me.username + ")" : "Sign out";
+      b.onclick = logout;
+    }
+  } catch { /* /api/me is public; ignore transient errors */ }
+}
 
 async function api(path, opts) {
   const res = await fetch(path, opts || {});
+  if (res.status === 401) {
+    location.href = "/login";
+    throw new Error("authentication required");
+  }
   const text = await res.text();
   let body; try { body = text ? JSON.parse(text) : {}; } catch { body = { raw: text }; }
   if (!res.ok) throw new Error(body.detail || body.raw || res.statusText);
@@ -258,3 +278,4 @@ function refreshAll() {
 $("api-token").value = token();
 connectWS();
 refreshAll();
+initAuth();

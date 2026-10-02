@@ -5,29 +5,42 @@ strategy versions, change settings, store credentials, trip/reset the kill
 switch, run backtests and download reports - plus a live WebSocket feed for the
 dashboard.
 
-Bound to localhost by default. If you expose it, set ``WEB_TOKEN`` and the API
-will require an ``X-Auth-Token`` header (the UI stores it locally).
+Bound to localhost by default. Set ``APP_PASSWORD`` to require a login, and/or
+let operators self-register at ``/register`` (the first account becomes an
+administrator; later sign-ups need ``REGISTER_CODE``). For scripts, setting
+``WEB_TOKEN`` still allows an ``X-Auth-Token`` header instead of a session.
 """
 
 from __future__ import annotations
 
 import asyncio
 import datetime as _dt
+import hmac
 import json
 from pathlib import Path
 
 import yaml
 
+from urllib.parse import quote
+
 from ..config import Settings
 from ..logging import get_logger
 from ..rules.spec import load_spec
+from .auth import (
+    DEFAULT_TTL_SECONDS,
+    SESSION_COOKIE,
+    create_session_token,
+    credentials_ok,
+    verify_session_token,
+)
 from .controller import Controller
+from .users import UserStore
 
 log = get_logger("web.api")
 
 try:
     from fastapi import Body, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
     from fastapi.staticfiles import StaticFiles
 except Exception:  # pragma: no cover
     FastAPI = None  # type: ignore[assignment]
@@ -64,16 +77,146 @@ def create_app(settings: Settings | None = None) -> "FastAPI":
     app = FastAPI(title="Bank Nifty Trading Console", docs_url="/api/docs", redoc_url=None)
 
     # ------------------------------------------------------------- security
+    store = UserStore(settings.auth_db_path) if settings else None
+    web_token = settings.secret(settings.web_token) if settings else ""
+    env_password = settings.secret(settings.app_password) if settings else ""
+    register_code = settings.secret(settings.register_code) if settings else ""
+    # Sign cookies with the env password plus a persisted random store key, so
+    # rotating the password or pointing at a fresh store invalidates old sessions.
+    session_secret = f"{env_password}|{store.secret()}" if store else env_password
+
+    def _login_required() -> bool:
+        return bool(env_password or (store and store.count() > 0))
+
+    def _registration_policy() -> dict:
+        if store is None:
+            return {"open": False, "first_run": False, "requires_code": False, "has_accounts": False}
+        has_accounts = store.count() > 0
+        first_run = not has_accounts and not env_password
+        is_open = first_run or bool(register_code)
+        return {
+            "open": is_open,
+            "first_run": first_run,
+            "requires_code": is_open and not first_run,
+            "has_accounts": has_accounts,
+        }
+
+    def _signed_in(request: Request) -> bool:
+        return bool(verify_session_token(session_secret, request.cookies.get(SESSION_COOKIE)))
+
+    def _set_session(response, username: str, request: Request):
+        response.set_cookie(
+            SESSION_COOKIE,
+            create_session_token(session_secret, username),
+            max_age=DEFAULT_TTL_SECONDS,
+            httponly=True,
+            samesite="lax",
+            secure=request.url.scheme == "https",
+            path="/",
+        )
+        return response
+
     @app.middleware("http")
     async def _auth_middleware(request: Request, call_next):
-        required = settings.secret(settings.web_token) if settings else ""
-        if (
-            required
-            and request.url.path.startswith("/api")
-            and request.headers.get("x-auth-token") != required
-        ):
-            return JSONResponse({"detail": "invalid or missing X-Auth-Token"}, status_code=401)
-        return await call_next(request)
+        path = request.url.path
+        login_on = _login_required()
+
+        # Already signed in? never show the login/register forms again.
+        if path in ("/login", "/register") and login_on:
+            if _signed_in(request):
+                return RedirectResponse(url="/", status_code=302)
+            return await call_next(request)
+
+        exempt = (
+            path == "/favicon.ico"
+            or path.startswith("/static/")
+            or path in ("/api/login", "/api/logout", "/api/register", "/api/registration-status")
+        )
+        if exempt or not (login_on or web_token):
+            return await call_next(request)
+
+        token_ok = bool(web_token and request.headers.get("x-auth-token") == web_token)
+        if _signed_in(request) or token_ok:
+            return await call_next(request)
+
+        if path.startswith(("/api", "/ws")):
+            return JSONResponse({"detail": "authentication required"}, status_code=401)
+        return RedirectResponse(url="/login?next=" + quote(path or "/"), status_code=302)
+
+    # ----------------------------------------------------------------- login
+    @app.get("/login", response_class=HTMLResponse)
+    async def login_page():
+        login_file = STATIC_DIR / "login.html"
+        if login_file.exists():
+            return HTMLResponse(login_file.read_text(encoding="utf-8"))
+        return HTMLResponse("<h1>Login UI not found</h1>")
+
+    @app.post("/api/login")
+    async def login(request: Request, payload: dict = Body(...)):
+        if not _login_required():
+            return JSONResponse({"ok": True, "login_enabled": False})
+        username = str(payload.get("username") or "").strip()
+        password = str(payload.get("password") or "")
+        account = store.verify(username, password) if store else None
+        if account is None and not (env_password and credentials_ok(settings, username, password)):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        display = account["username"] if account else username
+        role = account["role"] if account else "admin"
+        response = JSONResponse({"ok": True, "username": display, "role": role})
+        _set_session(response, display, request)
+        log.info("Web login: user=%s", display)
+        return response
+
+    @app.post("/api/logout")
+    async def logout():
+        response = JSONResponse({"ok": True})
+        response.delete_cookie(SESSION_COOKIE, path="/")
+        return response
+
+    # ------------------------------------------------------------ register
+    @app.get("/register", response_class=HTMLResponse)
+    async def register_page():
+        register_file = STATIC_DIR / "register.html"
+        if register_file.exists():
+            return HTMLResponse(register_file.read_text(encoding="utf-8"))
+        return HTMLResponse("<h1>Register UI not found</h1>")
+
+    @app.get("/api/registration-status")
+    async def registration_status():
+        return JSONResponse(_registration_policy())
+
+    @app.post("/api/register")
+    async def register(request: Request, payload: dict = Body(...)):
+        policy = _registration_policy()
+        if not policy["open"]:
+            raise HTTPException(status_code=403, detail="registration is closed")
+        if policy["requires_code"] and not hmac.compare_digest(str(payload.get("code") or ""), register_code):
+            raise HTTPException(status_code=403, detail="invalid invite code")
+        username = str(payload.get("username") or "")
+        password = str(payload.get("password") or "")
+        confirm = payload.get("confirm")
+        if confirm is not None and confirm != password:
+            raise HTTPException(status_code=400, detail="passwords do not match")
+        try:
+            account = store.create(username, password, role="admin" if policy["first_run"] else "user")
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        response = JSONResponse({"ok": True, "username": account["username"], "role": account["role"]})
+        _set_session(response, account["username"], request)
+        log.info("Web register: user=%s role=%s", account["username"], account["role"])
+        return response
+
+    @app.get("/api/me")
+    async def me(request: Request):
+        username = verify_session_token(session_secret, request.cookies.get(SESSION_COOKIE))
+        role = None
+        if username:
+            row = store.get(username) if store else None
+            if row:
+                role = row["role"]
+            elif settings and username == settings.app_username:
+                role = "admin"
+        return JSONResponse({"login_enabled": _login_required(), "username": username, "role": role})
 
     # ---------------------------------------------------------------- status
     @app.get("/api/status")
@@ -190,9 +333,12 @@ def create_app(settings: Settings | None = None) -> "FastAPI":
     @app.websocket("/ws")
     async def ws(sock: WebSocket):
         await sock.accept()
-        required = settings.secret(settings.web_token) if settings else ""
         token = sock.query_params.get("token") or sock.headers.get("x-auth-token")
-        if required and token != required:
+        token_ok = bool(web_token and token == web_token)
+        cookie_ok = bool(
+            login_on and verify_session_token(session_secret, sock.cookies.get(SESSION_COOKIE))
+        )
+        if (login_on or web_token) and not (token_ok or cookie_ok):
             await sock.close(code=4401)
             return
         try:

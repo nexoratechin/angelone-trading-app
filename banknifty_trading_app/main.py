@@ -130,7 +130,16 @@ def cmd_web(args: argparse.Namespace) -> int:
         settings.web_host = args.host
     if args.port:
         settings.web_port = args.port
+    from .web.users import UserStore
+
+    accounts = UserStore(settings.auth_db_path).count()
     print(f"\nBank Nifty web console: http://{settings.web_host}:{settings.web_port}\n")
+    if accounts:
+        print(f"Login required - {accounts} account(s) registered\n")
+    elif settings.login_enabled:
+        print(f"Login required - user: {settings.app_username}\n")
+    else:
+        print("No accounts yet - visit /register to create the first (admin) account\n")
     run_web(settings)
     return 0
 
