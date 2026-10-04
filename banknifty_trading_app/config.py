@@ -69,6 +69,23 @@ class Settings(BaseSettings):
         "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
     )
 
+    # --- client IP sent to Angel One ---------------------------------------
+    # smartapi-python hardcodes its X-ClientPublicIP/X-ClientLocalIP headers to
+    # a fixed value in a `finally` block, so by default Angel One sees someone
+    # else's IP - which breaks an IP-whitelisted API key. We patch the SDK with
+    # the real address before login. Leave BOTH blank to auto-detect; set them
+    # explicitly if you have a static IP or auto-detection is blocked.
+    client_public_ip: str = ""
+    client_local_ip: str = ""
+
+    # --- TLS trust ----------------------------------------------------------
+    # Use the operating system certificate store instead of certifi's bundle.
+    # Needed when a corporate proxy (Zscaler/Netskope/Fortinet...) re-signs TLS,
+    # because its root CA is in the OS store but not in certifi - without this,
+    # every HTTPS call fails with CERTIFICATE_VERIFY_FAILED. Verification stays
+    # ON; this only changes which root CAs are trusted.
+    use_system_trust_store: bool = True
+
     # --- execution ---------------------------------------------------------
     product_type: Literal["NRML", "MIS"] = "NRML"
     order_type: Literal["MARKET", "LIMIT"] = "MARKET"

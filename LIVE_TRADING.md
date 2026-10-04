@@ -68,6 +68,29 @@ Nothing is sent to the exchange. Your account cannot lose money.
 | 7 | A machine that stays awake 09:15-15:30 IST | Windows PC, VPS, etc. |
 | 8 | Reliable internet | the WebSocket auto-reconnects, but gaps lose ticks |
 
+### If you are on a corporate network
+
+Two things can block you before credentials even matter. `main preflight` checks
+both and names the cause:
+
+1. **TLS inspection.** A proxy (Zscaler, Netskope, Fortinet, ...) re-signs
+   HTTPS with its own root CA. That CA is in the Windows store but not in
+   `certifi`, so every request fails with `CERTIFICATE_VERIFY_FAILED`. The app
+   ships `truststore` and verifies against the OS store instead - verification
+   stays **on**. Look for the `Network / TLS` block in preflight output; it
+   prints the issuer, e.g. `Zscaler Inc.`.
+2. **IP whitelisting.** `smartapi-python` hardcodes its `X-ClientPublicIP`
+   header, so your whitelist would never match; the app patches it with your
+   real IP before login. **But if your outbound public IP changes between
+   requests** (common on multi-WAN or proxied corporate networks - we measured
+   three different egress addresses on one machine), no whitelist can be
+   reliable. Ask Angel One to remove the IP restriction, or run this on a VPS
+   with a stable address.
+
+  Also note: a proxy that inspects TLS can see this traffic, including your API
+  key and PIN, exactly as it can for any other HTTPS site. Prefer a VPS you
+  control for live trading.
+
 Put 2-5 into `.env`:
 
 ```bash
@@ -121,6 +144,9 @@ python -m banknifty_trading_app.main preflight --online   # logs in to Angel One
 an order. It checks:
 
 * the interlock flags,
+* **TLS: whether HTTPS to Angel One verifies, and who signed the certificate**
+  (catches a corporate inspecting proxy by name),
+* the instrument master is reachable,
 * credentials present + login accepted,
 * `MAX_LOTS` vs the strategy's lot count,
 * `MAX_DAILY_LOSS` / `MAX_TRADES_PER_DAY` set (warns if you have no daily stop),

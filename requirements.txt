@@ -4,7 +4,13 @@
 #   The official Python SDK is `smartapi-python` from Angel One.
 #   `pyotp` is used only to generate the TOTP from your TOTP secret.
 #   All REST/WebSocket calls go through the SDK - we never invent endpoints.
+#
+#   `logzero` and `six` are listed explicitly because smartapi-python imports
+#   both but does NOT declare them as dependencies. Without them the SDK fails
+#   at import time with a confusing "not installed" style error.
 smartapi-python>=1.5.5
+logzero>=1.7.0
+six>=1.16.0
 pyotp>=2.9.0
 
 # config
@@ -28,6 +34,11 @@ uvicorn>=0.30
 
 # websocket transport (transitive dep of smartapi-python, pinned for clarity)
 websocket-client>=1.7
+
+# TLS trust: verify against the OS certificate store instead of certifi only.
+# Required on networks with a TLS-inspecting proxy (Zscaler/Netskope/Fortinet),
+# otherwise every HTTPS call fails with CERTIFICATE_VERIFY_FAILED.
+truststore>=0.9.0
 
 # dev / tests
 pytest>=8.2

@@ -73,6 +73,13 @@ def create_app(settings: Settings | None = None) -> "FastAPI":
     if FastAPI is None:  # pragma: no cover
         raise RuntimeError("fastapi/uvicorn not installed")
 
+    # Must run before any outbound HTTPS so corporate TLS-inspection roots are
+    # trusted. Safe to call more than once; no-op if already enabled.
+    if settings is not None and settings.use_system_trust_store:
+        from ..tls import enable_system_trust_store
+
+        enable_system_trust_store()
+
     controller = Controller()
     app = FastAPI(title="Bank Nifty Trading Console", docs_url="/api/docs", redoc_url=None)
 

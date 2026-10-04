@@ -245,16 +245,32 @@ strategy_versions/ v1_baseline.yaml, v2_example.yaml
 
 ## Notes & caveats
 
+* **Corporate networks / TLS inspection.** If your connection goes through a
+  TLS-inspecting proxy (Zscaler, Netskope, Fortinet, ...), its root CA is in the
+  OS certificate store but not in `certifi`, so every HTTPS call - login,
+  instrument master, candles - fails with `CERTIFICATE_VERIFY_FAILED`. The app
+  installs `truststore` at start-up so verification uses the OS store instead.
+  This keeps verification **on** (never `verify=False`). Run
+  `main preflight` and look for the `Network / TLS` section: it names the
+  certificate issuer so you can tell inspection apart from a broken account.
+  Disable with `USE_SYSTEM_TRUST_STORE=false`; override the launcher with
+  `BANKNIFTY_NO_SYSTEM_TRUST=1`.
+* **The Angel One SDK sends a hardcoded client IP.** `smartapi-python` assigns
+  `X-ClientPublicIP` inside a `finally` block to a fixed address, so your key's
+  IP whitelist would never match. The app patches the SDK with your real public
+  IP before login (`CLIENT_PUBLIC_IP` to pin it). On networks where the outbound
+  IP **changes between requests** (multi-WAN or proxy egress), no whitelist can
+  work reliably - ask Angel One to drop the IP restriction.
 * The Angel One layer wraps only official `smartapi-python`
   (`SmartConnect`, `SmartWebSocketV2`). Endpoints/tokens are resolved from the
-  published instrument master - **no tokens are hard-coded**. The wrapper is
-  **verified line-by-line against the official SDK source**
-  (`generateSession`'s nested token shape, `ltpData` / `orderBook` / `position`,
-  `placeOrder(dict)` / `placeOrderFullResponse`, and the WebSocket's
-  already-parsed paise payload). Run `main check` on your machine to confirm the
-  live login + WebSocket before trading.
+  published instrument master - **no tokens are hard-coded**. Run `main check`
+  on your machine to confirm the live login + WebSocket before trading.
+  Note that `smartapi-python` does not declare all of its own dependencies
+  (`logzero`, `six`); `requirements.txt` pins them explicitly because a missing
+  one makes the SDK fail to import.
 * Bank Nifty futures **lot size is configurable** (`instrument.lot_size`),
-  defaulted to 30. Confirm the current NSE value before going live.
+  defaulted to 30. Confirm the current NSE value before going live -
+  `preflight --online` cross-checks it against the broker.
 * Historical backtests need broker credentials and are subject to the historical
   API's look-back limits; fetched chunks are cached under `data/history/`.
 * Backtest cost/charge rates in `backtest/costs.py` are **defaults to tune**.

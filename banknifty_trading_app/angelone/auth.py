@@ -25,10 +25,45 @@ from ..logging import get_logger
 
 log = get_logger("angelone.auth")
 
+SDK_IMPORT_ERROR: Exception | None = None
+
 try:  # pragma: no cover - import guard
     from SmartApi import SmartConnect
-except Exception:  # pragma: no cover
+except Exception as _exc:  # pragma: no cover
+    # Keep the real reason. smartapi-python ships without declaring all of its
+    # own dependencies (historically `logzero`, and `six` via SmartConnect), so
+    # a bare ImportError here usually means a missing transitive package - NOT
+    # that the user forgot to install smartapi-python. Surfacing the original
+    # exception is the difference between a 5-second fix and an hour of guessing.
     SmartConnect = None  # type: ignore[assignment]
+    SDK_IMPORT_ERROR = _exc
+
+
+def sdk_import_hint() -> str:
+    """Human-readable reason the Angel One SDK is unavailable."""
+    if SDK_IMPORT_ERROR is None:
+        return (
+            "smartapi-python is not importable, but no import error was recorded. "
+            "Run:  pip install -r requirements.txt"
+        )
+    exc = SDK_IMPORT_ERROR
+    if isinstance(exc, ModuleNotFoundError) and exc.name:
+        if exc.name == "SmartApi":
+            return (
+                "smartapi-python is not installed. Run:  pip install smartapi-python\n"
+                "  (or install everything:  pip install -r requirements.txt)"
+            )
+        # A transitive dependency of the SDK is missing. smartapi-python does not
+        # declare all of its own requirements, so name the exact package to add.
+        return (
+            f"smartapi-python is installed but its dependency '{exc.name}' is missing. "
+            f"Fix with:  pip install {exc.name}\n"
+            f"  (original error: {type(exc).__name__}: {exc})"
+        )
+    return (
+        f"smartapi-python could not be imported: {type(exc).__name__}: {exc}\n"
+        "  Fix with:  pip install -r requirements.txt"
+    )
 
 
 @dataclass
@@ -64,9 +99,7 @@ class AngelAuth:
     # ------------------------------------------------------------------ login
     def login(self) -> AngelSession:
         if SmartConnect is None:
-            raise RuntimeError(
-                "smartapi-python is not installed. Run: pip install smartapi-python"
-            )
+            raise RuntimeError(sdk_import_hint())
 
         api_key = self.settings.secret(self.settings.angel_api_key)
         client_code = self.settings.secret(self.settings.angel_client_code)
@@ -78,6 +111,12 @@ class AngelAuth:
                 "Missing Angel One credentials. Set ANGEL_API_KEY, ANGEL_CLIENT_CODE, "
                 "ANGEL_PIN and ANGEL_TOTP_SECRET in your .env file (or run: setup)."
             )
+
+        # Must happen before the first request: smartapi-python otherwise sends a
+        # hardcoded X-ClientPublicIP and IP-whitelisted keys get rejected.
+        from .client_ip import patch_sdk_client_ip
+
+        patch_sdk_client_ip(self.settings)
 
         import pyotp
 

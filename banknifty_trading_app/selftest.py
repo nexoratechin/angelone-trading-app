@@ -66,6 +66,18 @@ def run_selftest(settings: Settings, spec: StrategySpec | None = None, ws_second
         steps.fail("login", str(exc))
         return 1
 
+    from .angelone.client_ip import current_sdk_ips, is_using_sdk_hardcoded_ip
+
+    public_ip, local_ip = current_sdk_ips()
+    if is_using_sdk_hardcoded_ip():
+        steps.fail(
+            "client IP",
+            f"SDK is still sending its hardcoded X-ClientPublicIP={public_ip}. "
+            "Set CLIENT_PUBLIC_IP in .env.",
+        )
+    else:
+        steps.ok("client IP", f"X-ClientPublicIP={public_ip} X-ClientLocalIP={local_ip}")
+
     rest = AngelREST(settings, auth)
     try:
         master = InstrumentMaster(settings.instrument_cache_path, settings.angel_instrument_master_url)

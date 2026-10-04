@@ -28,6 +28,8 @@ log = get_logger("angelone.websocket")
 try:  # pragma: no cover
     from SmartApi.smartWebSocketV2 import SmartWebSocketV2
 except Exception:  # pragma: no cover
+    from .auth import sdk_import_hint
+
     SmartWebSocketV2 = None  # type: ignore[assignment]
 
 # callback(token: str, ltp: float, ts: datetime) -> None
@@ -90,7 +92,9 @@ class AngelWebSocket:
 
     def _run_once(self) -> None:
         if SmartWebSocketV2 is None:
-            raise RuntimeError("smartapi-python is not installed; cannot start feed")
+            from .auth import sdk_import_hint
+
+            raise RuntimeError(sdk_import_hint())
         session = self.auth.ensure_logged_in()
 
         # max_retry_attempt=0 -> the SDK will not self-reconnect; we own it.

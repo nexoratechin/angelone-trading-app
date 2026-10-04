@@ -36,6 +36,10 @@ def _bootstrap(strategy: str | None = None) -> tuple[Settings, object]:
         settings.active_strategy = strategy
     settings.ensure_dirs()
     setup_logging(settings.log_dir)
+    if settings.use_system_trust_store:
+        from .tls import enable_system_trust_store
+
+        enable_system_trust_store()
     spec = load_spec(settings.strategy_path())
     return settings, spec
 

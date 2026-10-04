@@ -86,6 +86,52 @@ def _check_interlock(settings: Settings, r: Report) -> None:
         )
 
 
+def _check_network(settings: Settings, r: Report) -> None:
+    """Catch corporate TLS inspection before it looks like a login failure."""
+    s = "2b. Network / TLS"
+    from .tls import enable_system_trust_store, looks_like_tls_inspection, tls_diagnosis
+
+    if settings.use_system_trust_store:
+        active = enable_system_trust_store()
+        if active:
+            r.add(PASS, s, "verifying TLS against the OS certificate store")
+        else:
+            r.add(
+                WARN,
+                s,
+                "USE_SYSTEM_TRUST_STORE=true but truststore is not installed "
+                "(pip install truststore) - falling back to certifi",
+            )
+    else:
+        r.add(WARN, s, "USE_SYSTEM_TRUST_STORE=false: only certifi's roots are trusted")
+
+    diag = tls_diagnosis("apiconnect.angelone.in")
+    if diag["ok"]:
+        issuer = diag["issuer"] or "unknown"
+        if looks_like_tls_inspection(issuer):
+            r.add(
+                INFO,
+                s,
+                f"TLS is re-signed by '{issuer}' (network inspection). Verification passes "
+                "via the OS store; the proxy can see this traffic like any other HTTPS.",
+            )
+        else:
+            r.add(PASS, s, f"TLS to apiconnect.angelone.in verified (issuer: {issuer})")
+    else:
+        r.add(FAIL, s, f"cannot verify TLS to apiconnect.angelone.in: {diag['error'][:160]}")
+
+    import requests
+
+    try:
+        resp = requests.get(settings.angel_instrument_master_url, timeout=20)
+        if resp.ok:
+            r.add(PASS, s, f"instrument master reachable ({len(resp.content) // 1024} KB)")
+        else:
+            r.add(WARN, s, f"instrument master returned HTTP {resp.status_code}")
+    except Exception as exc:
+        r.add(FAIL, s, f"instrument master unreachable: {type(exc).__name__}: {str(exc)[:120]}")
+
+
 def _check_credentials(settings: Settings, r: Report) -> None:
     s = "2. Angel One account"
     creds = settings.redacted_credentials()
@@ -99,6 +145,32 @@ def _check_credentials(settings: Settings, r: Report) -> None:
     r.add(INFO, s, "Your static IP must be whitelisted if the API key is IP-locked")
     r.add(INFO, s, "TOTP secret must be the base32 seed, not a rotating 6-digit code")
     r.add(INFO, s, "Contract notes / MIS enabled in the account if you use intraday product")
+
+    # smartapi-python hardcodes the X-ClientPublicIP header, which breaks
+    # whitelisted keys. We patch it; show which address will actually be sent.
+    from .angelone.client_ip import (
+        current_sdk_ips,
+        is_using_sdk_hardcoded_ip,
+        resolve_client_ips,
+    )
+
+    public, local = resolve_client_ips(settings)
+    if not public:
+        r.add(
+            FAIL,
+            s,
+            "could not determine your public IP. If your API key is IP-whitelisted the "
+            "login will be rejected - set CLIENT_PUBLIC_IP in .env.",
+        )
+    else:
+        r.add(PASS, s, f"requests will report X-ClientPublicIP={public} (local {local})")
+    if is_using_sdk_hardcoded_ip():
+        r.add(
+            WARN,
+            s,
+            "the SDK has not been patched yet (it still holds its built-in IP). "
+            "It is patched automatically on login - set CLIENT_PUBLIC_IP to be sure.",
+        )
 
 
 def _check_risk(settings: Settings, spec: StrategySpec, r: Report) -> None:
@@ -322,6 +394,7 @@ def run_preflight(settings: Settings, spec: StrategySpec | None = None, online: 
     print("=" * 72)
 
     _check_interlock(settings, r)
+    _check_network(settings, r)
     _check_credentials(settings, r)
     _check_risk(settings, spec, r)
     _check_instrument(spec, r)
