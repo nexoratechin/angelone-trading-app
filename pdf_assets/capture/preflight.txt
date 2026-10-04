@@ -1,0 +1,69 @@
+========================================================================
+GO-LIVE PREFLIGHT  -  read-only, places no orders
+strategy=v1_baseline  mode=paper  armed=False
+========================================================================
+
+[1. Live-trading interlock]
+  INFO MODE=paper
+  INFO LIVE_TRADING=False
+  INFO LIVE_ARMED=False
+  PASS Live trading is locked - no real orders can be placed. Good while paper trading.
+
+[2b. Network / TLS]
+  PASS verifying TLS against the OS certificate store
+  INFO TLS is re-signed by 'Zscaler Inc.' (network inspection). Verification passes via the OS store; the proxy can see this traffic like any other HTTPS.
+  PASS instrument master reachable (33023 KB)
+
+[2. Angel One account]
+  FAIL credentials missing: angel_api_key, angel_client_code, angel_pin, angel_totp_secret  (run: setup)
+  INFO SmartAPI app must be ACTIVE in the Angel One portal (not deleted/expired)
+  INFO Your static IP must be whitelisted if the API key is IP-locked
+  INFO TOTP secret must be the base32 seed, not a rotating 6-digit code
+  INFO Contract notes / MIS enabled in the account if you use intraday product
+  PASS requests will report X-ClientPublicIP=167.103.138.83 (local 192.168.29.187)
+  WARN the SDK has not been patched yet (it still holds its built-in IP). It is patched automatically on login - set CLIENT_PUBLIC_IP to be sure.
+
+[3. Risk limits]
+  PASS MAX_LOTS=10 allows the strategy's 2 lots
+  WARN MAX_DAILY_LOSS is not set: no automatic stop for a losing day
+  WARN MAX_TRADES_PER_DAY is not set: no cap on how many times it may re-enter
+  PASS kill switch is not tripped
+  INFO Verify the kill switch works: run 'kill test', confirm trading halts, 'unkill'
+
+[4. Instrument & contract]
+  PASS trading BANKNIFTY on NFO, signals from NIFTY BANK (NSE)
+  PASS 2 lots x lot_size 30 = 60 qty per entry
+  WARN lot_size=30 is set in YAML - CONFIRM the current NSE BANKNIFTY lot size. A wrong lot size silently sends the wrong quantity.
+  PASS reversal on: 2 lots, cap 3/day, cooldown 60.0s
+
+[5. Session window (IST)]
+  PASS MARKET_OPEN=09:15
+  PASS MARKET_CLOSE=15:30
+  PASS expiry square-off at 15:15, before the 15:30 close
+  INFO PRODUCT_TYPE=NRML carries overnight - you need overnight margin
+
+[6. Execution model]
+  PASS ORDER_TYPE=MARKET: fills at best available price, no price control
+  PASS paper fills simulate 0.5 pt slippage; live fills are whatever the exchange gives you - usually worse
+  PASS order status timeout 10.0s (no blind fill assumption)
+  WARN the '2% move' trailing rule is an undecided placeholder - decide its formula in the strategy YAML before trading it live
+
+[7. Operations (only you can confirm)]
+  INFO Machine stays ON and connected for the whole 09:15-15:30 window
+  INFO No OS sleep / hibernate / screen-lock that pauses the process
+  INFO Reliable internet; the WebSocket auto-reconnects but gaps lose ticks
+  INFO Angel One must allow unattended API order placement for your account
+  INFO Broker-side RMS / risk limits are not tighter than this app's limits
+  INFO You know how to flatten the position manually from the broker terminal
+  INFO You have watched paper results for several sessions and trust the P&L
+  INFO Account funds cover margin for the worst case, including reversal chains
+
+[8. Broker session]
+  INFO skipped - add --online to test login and instruments
+
+========================================================================
+VERDICT: NOT READY - 1 blocking issue(s):
+  - credentials missing: angel_api_key, angel_client_code, angel_pin, angel_totp_secret  (run: setup)
+
+Fix these before running 'arm-live'.
+========================================================================

@@ -1,0 +1,10 @@
+py : 2026-10-04 09:58:53 | INFO    | banknifty.tls | TLS verification uses the OS trust store (truststore). 
+Corporate/custom root CAs installed on this machine are honoured.
+At line:5 char:1
++ py -3 -m banknifty_trading_app.main kill "guide demo kill" *> pdf_ass ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2026-10-04 09:5...e are honoured.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2026-10-04 09:58:53 | ERROR   | banknifty.risk.kill_switch | KILL SWITCH TRIPPED: guide demo kill
+Kill switch tripped: pdf_assets\capture\data\KILL_SWITCH

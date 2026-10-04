@@ -1,0 +1,2 @@
+
+Backtest complete: 46 legs, net P&L -45,297.15, report in pdf_assets\capture\reports

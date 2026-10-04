@@ -1,0 +1,340 @@
+py : [E 261004 09:58:08 smartConnect:78] Exception while retriving IP Address,using local host IP address: 
+HTTPSConnectionPool(host='api.ipify.org', port=443): Max retries exceeded with url: / (Caused by 
+SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local 
+issuer certificate (_ssl.c:1000)')))
+At line:1 char:377
++ ... ents.json"; py -3 -m banknifty_trading_app.main demo --start 2025-09- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([E 261004 09:58...ssl.c:1000)'))):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2026-10-04 09:58:10 | INFO    | banknifty.tls | TLS verification uses the OS trust store (truststore). 
+Corporate/custom root CAs installed on this machine are honoured.
+2026-10-04 09:58:10 | INFO    | banknifty.demo | DEMO (offline, paper execution) strategy=v1_baseline 
+2025-09-01..2026-03-01 lot_size=30
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-09-29 ref=51070.96 prev=51211.21 
+sma=50019.96 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=entry_signal spot=51088.14 
+stop=51088.14
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=51052.95 
+stop=51088.14448629926
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=51052.95 
+stop=51211.21
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=51223.05 
+stop=51211.209267328006
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=51223.05 
+stop=51211.21
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=51196.17 
+stop=51211.209267328006
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=51196.17 
+stop=51211.21
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=51214.88 
+stop=51211.209267328006
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-09-30 ref=51211.21 prev=51647.68 
+sma=50096.97 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-01 ref=51647.68 prev=50972.83 
+sma=50115.96 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-02 ref=50972.83 prev=50824.42 
+sma=50161.42 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-03 ref=50824.42 prev=50624.15 
+sma=50184.09 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-06 ref=50624.15 prev=50252.30 
+sma=50210.0 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-07 ref=50252.30 prev=49894.11 
+sma=50230.8 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-08 ref=49894.11 prev=49809.33 
+sma=50224.22 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-09 ref=49809.33 prev=49172.16 
+sma=50186.65 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-10 ref=49172.16 prev=49230.01 
+sma=50160.76 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-13 ref=49230.01 prev=49312.64 
+sma=50155.7 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-14 ref=49312.64 prev=50301.40 
+sma=50181.44 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-15 ref=50301.40 prev=50802.28 
+sma=50250.75 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-16 ref=50802.28 prev=50001.25 
+sma=50268.72 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-17 ref=50001.25 prev=49837.16 
+sma=50266.76 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-20 ref=49837.16 prev=49746.18 
+sma=50275.88 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-21 ref=49746.18 prev=49729.51 
+sma=50277.14 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-22 ref=49729.51 prev=49696.89 
+sma=50231.56 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-23 ref=49696.89 prev=50068.94 
+sma=50210.27 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-24 ref=50068.94 prev=49596.81 
+sma=50136.56 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.demo |   day 2025-10-24 processed (20) | open=- lots=0 realized=-7836.00
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-27 ref=49596.81 prev=48940.05 
+sma=50023.01 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-28 ref=48940.05 prev=48519.18 
+sma=49866.58 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-29 ref=48519.18 prev=48380.58 
+sma=49736.97 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-30 ref=48380.58 prev=48556.85 
+sma=49623.59 last_day=True
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-10-31 ref=48556.85 prev=48608.98 
+sma=49522.83 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=entry_signal spot=48552.99 
+stop=48608.98
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=48619.81 
+stop=48608.98428625994
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=48619.81 
+stop=48608.98
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=48604.84 
+stop=48608.98428625994
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=48604.84 
+stop=48608.98
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=48614.54 
+stop=48608.98428625994
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=48614.54 
+stop=48608.98
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=48608.37 
+stop=48608.98428625994
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-03 ref=48608.98 prev=49034.33 
+sma=49461.93 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-04 ref=49034.33 prev=48623.22 
+sma=49398.39 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-05 ref=48623.22 prev=48398.08 
+sma=49327.83 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-06 ref=48398.08 prev=48309.69 
+sma=49284.7 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-07 ref=48309.69 prev=48771.92 
+sma=49261.8 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-10 ref=48771.92 prev=48904.58 
+sma=49241.39 last_day=False
+2026-10-04 09:58:11 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-11 ref=48904.58 prev=48582.21 
+sma=49155.43 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-12 ref=48582.21 prev=48596.34 
+sma=49045.14 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-13 ref=48596.34 prev=48311.44 
+sma=48960.65 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-14 ref=48311.44 prev=48061.47 
+sma=48871.86 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-17 ref=48061.47 prev=47599.03 
+sma=48764.51 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-18 ref=47599.03 prev=47370.36 
+sma=48646.55 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-19 ref=47370.36 prev=47359.72 
+sma=48529.69 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-20 ref=47359.72 prev=47619.95 
+sma=48407.24 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-21 ref=47619.95 prev=47336.22 
+sma=48294.21 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.demo |   day 2025-11-21 processed (40) | open=- lots=0 realized=-11781.00
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-24 ref=47336.22 prev=47939.01 
+sma=48244.16 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-25 ref=47939.01 prev=48719.46 
+sma=48254.17 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-26 ref=48719.46 prev=48976.89 
+sma=48283.99 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-27 ref=48976.89 prev=49058.03 
+sma=48309.05 last_day=True
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-11-28 ref=49058.03 prev=49028.07 
+sma=48330.0 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=entry_signal spot=49059.21 
+stop=49028.07
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=49011.02 
+stop=49028.07154501134
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=49011.02 
+stop=49028.07
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=49035.39 
+stop=49028.07154501134
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=49035.39 
+stop=49028.07
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=49022.27 
+stop=49028.07154501134
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=49022.27 
+stop=49028.07
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=49044.15 
+stop=49028.07154501134
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-01 ref=49028.07 prev=48799.88 
+sma=48318.28 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-02 ref=48799.88 prev=48447.98 
+sma=48309.52 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-03 ref=48447.98 prev=48293.96 
+sma=48304.31 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-04 ref=48293.96 prev=47886.25 
+sma=48283.14 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-05 ref=47886.25 prev=47920.53 
+sma=48240.57 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-08 ref=47920.53 prev=47222.25 
+sma=48156.45 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-09 ref=47222.25 prev=46679.03 
+sma=48061.29 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-10 ref=46679.03 prev=46454.82 
+sma=47954.22 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-11 ref=46454.82 prev=46826.22 
+sma=47879.96 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-12 ref=46826.22 prev=46646.29 
+sma=47809.2 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-15 ref=46646.29 prev=46487.21 
+sma=47753.61 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-16 ref=46487.21 prev=46940.87 
+sma=47732.13 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-17 ref=46940.87 prev=47928.48 
+sma=47760.57 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-18 ref=47928.48 prev=47679.31 
+sma=47763.54 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-19 ref=47679.31 prev=48129.19 
+sma=47803.19 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.demo |   day 2025-12-19 processed (60) | open=- lots=0 realized=-19746.00
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-22 ref=48129.19 prev=48424.12 
+sma=47827.44 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-23 ref=48424.12 prev=49064.18 
+sma=47844.68 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-24 ref=49064.18 prev=48243.65 
+sma=47808.02 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-25 ref=48243.65 prev=48046.09 
+sma=47757.42 last_day=True
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-26 ref=48046.09 prev=47958.63 
+sma=47703.95 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=entry_signal spot=48093.75 
+stop=47958.63
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=47950.36 
+stop=47958.626474473196
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=47950.36 
+stop=47958.63
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=47966.85 
+stop=47958.626474473196
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=47966.85 
+stop=47958.63
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=47947.51 
+stop=47958.626474473196
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=47947.51 
+stop=47958.63
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=47961.89 
+stop=47958.626474473196
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-29 ref=47958.63 prev=48431.08 
+sma=47685.51 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-30 ref=48431.08 prev=48171.58 
+sma=47671.69 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2025-12-31 ref=48171.58 prev=48449.75 
+sma=47679.48 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-01 ref=48449.75 prev=48321.31 
+sma=47701.23 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-02 ref=48321.31 prev=48409.93 
+sma=47725.7 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-05 ref=48409.93 prev=48255.92 
+sma=47777.38 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-06 ref=48255.92 prev=48112.26 
+sma=47849.04 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-07 ref=48112.26 prev=47649.39 
+sma=47908.77 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-08 ref=47649.39 prev=47209.95 
+sma=47927.96 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-09 ref=47209.95 prev=46569.22 
+sma=47924.11 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-12 ref=46569.22 prev=47416.25 
+sma=47970.56 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-13 ref=47416.25 prev=47138.45 
+sma=47980.44 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-14 ref=47138.45 prev=46743.87 
+sma=47921.21 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-15 ref=46743.87 prev=46625.77 
+sma=47868.53 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-16 ref=46625.77 prev=45986.44 
+sma=47761.39 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.demo |   day 2026-01-16 processed (80) | open=- lots=0 realized=-19191.00
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-19 ref=45986.44 prev=46368.59 
+sma=47658.62 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-20 ref=46368.59 prev=46624.45 
+sma=47536.63 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-21 ref=46624.45 prev=46049.01 
+sma=47426.9 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-22 ref=46049.01 prev=46197.58 
+sma=47334.47 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-23 ref=46197.58 prev=45993.20 
+sma=47236.2 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-26 ref=45993.20 prev=46994.74 
+sma=47164.38 last_day=False
+2026-10-04 09:58:12 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-27 ref=46994.74 prev=46764.78 
+sma=47094.04 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-28 ref=46764.78 prev=47065.91 
+sma=47024.85 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-29 ref=47065.91 prev=47298.53 
+sma=46973.71 last_day=True
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-01-30 ref=47298.53 prev=47892.68 
+sma=46947.85 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=entry_signal spot=47306.07 
+stop=47306.07
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=47281.34 
+stop=47306.07366177998
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=47281.34 
+stop=47892.68
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-02 ref=47892.68 prev=47302.08 
+sma=46900.16 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=47306.34 
+stop=47302.07546291206
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=47306.34 
+stop=47302.08
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=47270.40 
+stop=47302.07546291206
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=47270.40 
+stop=47302.08
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=47311.85 
+stop=47302.07546291206
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=47311.85 
+stop=47302.08
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=47294.56 
+stop=47302.07546291206
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-03 ref=47302.08 prev=47072.13 
+sma=46848.15 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-04 ref=47072.13 prev=46284.02 
+sma=46779.88 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-05 ref=46284.02 prev=46853.22 
+sma=46762.05 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-06 ref=46853.22 prev=46918.90 
+sma=46779.53 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-09 ref=46918.90 prev=46760.09 
+sma=46746.72 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-10 ref=46760.09 prev=47397.22 
+sma=46759.66 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-11 ref=47397.22 prev=47401.22 
+sma=46792.53 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-12 ref=47401.22 prev=47518.52 
+sma=46837.16 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-13 ref=47518.52 prev=46840.60 
+sma=46879.87 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.demo |   day 2026-02-13 processed (100) | open=- lots=0 realized=-22575.00
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-16 ref=46840.60 prev=46560.79 
+sma=46889.48 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-17 ref=46560.79 prev=46591.00 
+sma=46887.81 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-18 ref=46591.00 prev=46795.35 
+sma=46925.13 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-19 ref=46795.35 prev=47237.63 
+sma=46977.13 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-20 ref=47237.63 prev=47202.22 
+sma=47037.58 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-23 ref=47202.22 prev=47292.63 
+sma=47052.48 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-24 ref=47292.63 prev=46973.98 
+sma=47062.94 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-25 ref=46973.98 prev=46920.74 
+sma=47055.68 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-26 ref=46920.74 prev=46062.87 
+sma=46993.89 last_day=True
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [day_start] 2026-02-27 ref=46062.87 prev=46162.80 
+sma=46907.4 last_day=False
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=entry_signal spot=46053.79 
+stop=46162.8
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] SELL stop hit at spot=46165.11 
+stop=46162.801290317635
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] BUY 2 lot(s) reason=reversal spot=46165.11 
+stop=46162.8
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [stop_loss] BUY stop hit at spot=46160.99 
+stop=46162.801290317635
+2026-10-04 09:58:13 | INFO    | banknifty.strategy.engine | [enter] SELL 2 lot(s) reason=reversal spot=46160.99 
+stop=46162.8
+2026-10-04 09:58:13 | INFO    | banknifty.reports.excel | Wrote report: pdf_assets\capture\reports\demo_report.xlsx 
+(46 trades)
+2026-10-04 09:58:13 | INFO    | banknifty.demo | DEMO complete: 46 legs, realized P&L -31335.00, 
+report=pdf_assets\capture\reports\demo_report.xlsx
+
+DEMO finished. Report: pdf_assets\capture\reports\demo_report.xlsx
+Trades persisted to: pdf_assets\capture\data\banknifty.sqlite3  (run 'report' to regenerate)

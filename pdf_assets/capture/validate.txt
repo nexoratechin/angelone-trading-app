@@ -1,0 +1,15 @@
+Strategy: v1_baseline
+  description : Original Bank Nifty strategy: 20 SMA filter on daily Spot closes; entry on a fre
+  instrument  : BANKNIFTY near_month x2 lots (30/lot)
+  reference   : offset 2 day(s) before yesterday
+  SMA period  : 20
+  filters     : ['sma']
+  entry       : reference_cross
+  stop        : daily_close
+  partial     : percent_move
+  trailing    : percent_move_placeholder
+  expiry      : always
+  reversal    : on x2
+
+Mode: paper (live trading disabled)
+Credentials: {'angel_api_key': 'missing', 'angel_client_code': 'missing', 'angel_pin': 'missing', 'angel_totp_secret': 'missing'}

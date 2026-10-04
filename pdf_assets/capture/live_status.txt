@@ -1,0 +1,8 @@
+Live-trading interlock
+======================
+  [-- ] MODE           paper
+  [-- ] LIVE_TRADING   false
+  [-- ] LIVE_ARMED     false
+
+State: PAPER (safe)
+  live trading is LOCKED: LIVE_ARMED=false (master arm switch), MODE='paper' (need MODE=live), LIVE_TRADING=false (need LIVE_TRADING=true)

@@ -1,0 +1,1 @@
+Wrote report: pdf_assets\capture\reports\live_trades_report.xlsx
